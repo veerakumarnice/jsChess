@@ -28,7 +28,6 @@
 <br><br>
 <div class="start" >
 <button onclick="startGame(this)" >Click here to Start! </button>
-
 </div>
 
 
@@ -42,6 +41,7 @@ function startGame(src) {
 	if(!gameIn) {
 		src.innerHTML = "Click here to Stop!" ;
 		gameIn = true;
+		chance = 'white';
 		addSquares(src);
 		addChessElements(src);
 	}
@@ -98,7 +98,7 @@ function addPawns(src) {
 	for(var col =1;col<=8;col++) {	
 		var pawn = document.getElementById(""+col+2);
 		var img = document.createElement("img");
-		img.setAttribute("src","pawnBlack.png");
+		img.setAttribute("src","blackPawn.png");
 		img.setAttribute("class","piece pawn black");
 		img.setAttribute("onmouseover","this.style.cursor='grab';");
 		img.setAttribute("onclick","moveElement(event,this)");
@@ -111,7 +111,7 @@ function addPawns(src) {
 	for(var col =1;col<=8;col++) {	
 		var pawn = document.getElementById(""+col+7);
 		var img = document.createElement("img");
-		img.setAttribute("src","pawnWhite.png");
+		img.setAttribute("src","whitePawn.png");
 		img.setAttribute("class","piece pawn white");
 		img.setAttribute("onmouseover","this.style.cursor='grab';");
 		img.setAttribute("onclick","moveElement(event,this)");
@@ -132,12 +132,12 @@ function addRooks() {
 		target = document.getElementById(array[i]);
 		var img = document.createElement("img");
 		if(i%2==0) {
-			img.setAttribute("src","rookBlack.png");
+			img.setAttribute("src","blackRook.png");
 			img.setAttribute("class","piece rook black");
 			img.setAttribute("player","black");
 		}
 		else {
-			img.setAttribute("src","rookWhite.png");
+			img.setAttribute("src","whiteRook.png");
 			img.setAttribute("class","piece rook white");
 			img.setAttribute("player","white");
 		}
@@ -156,12 +156,12 @@ function addBhisops() {
 		target = document.getElementById(array[i]);
 		var img = document.createElement("img");
 		if(i%2==0) {
-			img.setAttribute("src","bishopBlack.png");
+			img.setAttribute("src","blackBishop.png");
 			img.setAttribute("class","piece bishop black");
 			img.setAttribute("player","black");
 		}
 		else {
-			img.setAttribute("src","bishopWhite.png");
+			img.setAttribute("src","whiteBishop.png");
 			img.setAttribute("class","piece bishop white");
 			img.setAttribute("player","white");
 		}
@@ -181,12 +181,12 @@ function addKnights() {
 		target = document.getElementById(array[i]);
 		var img = document.createElement("img");
 		if(i%2==0) {
-			img.setAttribute("src","knightBlack.png");
+			img.setAttribute("src","blackKnight.png");
 			img.setAttribute("class","piece knight black");
 			img.setAttribute("player","black");
 		}
 		else {
-			img.setAttribute("src","knightWhite.png");
+			img.setAttribute("src","whiteKnight.png");
 			img.setAttribute("class","piece knight white");
 			img.setAttribute("player","white");
 		}
@@ -205,12 +205,12 @@ function addQueen() {
 		target = document.getElementById(array[i]);
 		var img = document.createElement("img");
 		if(i%2==0) {
-			img.setAttribute("src","queenBlack.png");
+			img.setAttribute("src","blackQueen.png");
 			img.setAttribute("class","piece queen black");
 			img.setAttribute("player","black");
 		}
 		else {
-			img.setAttribute("src","queenWhite.png");
+			img.setAttribute("src","whiteQueen.png");
 			img.setAttribute("class","piece queen white");
 			img.setAttribute("player","white");
 		}
@@ -230,12 +230,12 @@ function addKing() {
 		target = document.getElementById(array[i]);
 		var img = document.createElement("img");
 		if(i%2==0) {
-			img.setAttribute("src","kingBlack.png");
+			img.setAttribute("src","blackKing.png");
 			img.setAttribute("class","piece king black");
 			img.setAttribute("player","black");
 		}
 		else {
-			img.setAttribute("src","kingWhite.png");
+			img.setAttribute("src","whiteKing.png");
 			img.setAttribute("class","piece king white");
 			img.setAttribute("player","white");
 		}
