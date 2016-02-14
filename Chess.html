@@ -12,7 +12,7 @@
 <table>
 <tbody>
 	<tr>
-		<td id="pel"></td><td id="onm"></td> 
+		<td id="pel"></td><td id="onm"></td><td id="turn"></td> 
 	</tr>
 </tbody>
 </table>
@@ -33,6 +33,7 @@
 
 
 <script>
+var chance = 'white' ;
 var gameIn = false;
 var pElem;
 var onmove = false;
@@ -198,11 +199,52 @@ function addKnights() {
 }
 
 function addQueen() {
+		var array = [41,48];
+		var target;
+		for(var i in array) {
+		target = document.getElementById(array[i]);
+		var img = document.createElement("img");
+		if(i%2==0) {
+			img.setAttribute("src","queenBlack.png");
+			img.setAttribute("class","piece queen black");
+			img.setAttribute("player","black");
+		}
+		else {
+			img.setAttribute("src","queenWhite.png");
+			img.setAttribute("class","piece queen white");
+			img.setAttribute("player","white");
+		}
+		img.setAttribute("onmouseover","this.style.cursor='grab';");
+		img.setAttribute("onclick","moveElement(event,this)");
+		img.setAttribute("piece","queen");
+		img.setAttribute("id","queen"+(Math.floor(i/2)+1));
+		target.appendChild(img);
+	}
 
 }
 
 function addKing() {
-
+		var array = [51,58];
+		var target;
+		for(var i in array) {
+		target = document.getElementById(array[i]);
+		var img = document.createElement("img");
+		if(i%2==0) {
+			img.setAttribute("src","kingBlack.png");
+			img.setAttribute("class","piece king black");
+			img.setAttribute("player","black");
+		}
+		else {
+			img.setAttribute("src","kingWhite.png");
+			img.setAttribute("class","piece king white");
+			img.setAttribute("player","white");
+		}
+		img.setAttribute("onmouseover","this.style.cursor='grab';");
+		img.setAttribute("onclick","moveElement(event,this)");
+		img.setAttribute("piece","king");
+		img.setAttribute("id","king"+(Math.floor(i/2)+1));
+		target.appendChild(img);
+	}
 }
 function removeSquares() {
 	var tbody = document.getElementById('chessBody');
@@ -220,6 +262,13 @@ function pickThis(event, src) {
 }
 
 function moveElement(event, src) {
+
+	if(src.getAttribute("player") != chance && !onmove) {
+		alert("Its your oppnenet's move");
+		stopEvent(event);
+		return;
+	}
+
 	if(onmove && src==pElem) {
 		//alert("source = destination");		
 		onmove = false;
@@ -254,6 +303,7 @@ function moveToThis(event, src) {
 				src.appendChild(pElem);
 				onmove = false;
 				pElem = null;
+				changeChance();
 			} 
 		}
 		else
@@ -263,21 +313,32 @@ function moveToThis(event, src) {
 		//alert("The destination contains another coin");
 		//alert("The first piece is "+ pElem.getAttribute("player"));
 		if(src.childNodes[0].getAttribute("player") == pElem.getAttribute("player")) {
-			alert("You are hitting your own coin");
+			alert("That's your piece try some other position");
 		}			
 		else
 		{
 			if(validMove(src)) {
-				alert("Trying to cut oppnenet coin");
+				//alert("Trying to cut oppnenet coin");
 				cutPiece(pElem, src.childNodes[0]);
 				pElem = null;
 				onmove = false;
+				changeChance();
 			}
 			
 		}
 	}
 
 }
+
+function changeChance() {
+	if(chance == 'white') {
+		chance = 'black';
+ 	}
+ 	else {
+ 		chance = "white";
+ 	}
+}
+
 function validMove(src) {
 
 	var pType = pElem.getAttribute("piece");
@@ -333,27 +394,29 @@ function validMove(src) {
 					
 					if(!hasIntermediate(sPos,dPos, 'plus', retObj.direction)) {
 						result = true;
-					}
-				
+					}				
 			}
-
 			break;
 		case "knight" :
 			result  = isHorse(pElem.parentNode,src);						
 			break;
 		case "bishop" :
 			if((retObj = isCross(pElem.parentNode,src)).bool) {
-					console.log("iscross success");
+				    //console.log("iscross success");
 					if(!hasIntermediate(sPos, dPos, 'cross', retObj.direction)) {
 						result = true;
 					}
 			}
 			break;
 		case "queen" :
-
+			if((retObj = isQueenCross(pElem.parentNode, src)).bool) {
+				if(!hasIntermediate(sPos, dPos, retObj.sign , retObj.direction)) {
+					result =  true;
+				}
+			}
 			break;
 		case "king" :
-
+			result = isKing(pElem.parentNode, src);
 			break;
 
 
@@ -398,12 +461,12 @@ function hasIntermediate(attacker, fallen, sign, direction) {
 			else if(direction == 'left') {
 				increment = 9;
 			}
-			console.log('increment = '+increment);
+			//console.log('increment = '+increment);
 			for(start+=increment;start!=end;start+=increment) {
-				console.log('checking start='+start +' end = '+end);
+				//console.log('checking start='+start +' end = '+end);
 				if(document.getElementById(start).childNodes[0]) {
 					result = true;
-					console.log("hitting another coin at " + start);
+					//console.log("hitting another coin at " + start);
 				 	break;
 				}
 			}
@@ -460,7 +523,7 @@ function isCross(attacker, fallen) {
 	if(!result.bool) {
 		console.log('started second loop with start  =' +start+' end = '+end);
 		for( ;end >= start;end-=9) {
-			//console.log('start ' + start+ ' end = '+ end);
+			console.log('start ' + start+ ' end = '+ end);
 			if(end == start) {
 				//alert("start = end");
 				result.bool = true;
@@ -476,14 +539,38 @@ function isCross(attacker, fallen) {
 	return result;
 }
 
+function isQueenCross(attacker, fallen) {
+	var result = {bool:false,direction:'none'};
+	var sign;
+	if( (result= isPlus(attacker, fallen)).bool ) {
+		result.sign = 'plus';
+	}
+	else {
+		result = isCross(attacker, fallen);
+		result.sign = 'cross';
+	}
+	return result;
+}
+
 
 function isHorse(attacker, fallen) {
-	console.log("ishorse exeuctes");
+	//console.log("ishorse exeuctes");
 	var result = false;
 	var horse = [-8,8,-12,12,-19,19,-21,21];
 	var start = attacker.getAttribute('id');
 	var end = fallen.getAttribute('id');
 	if(horse.indexOf(start-end) > -1) {
+		result = true;
+	}
+	return result;
+}
+
+function isKing(attacker, fallen) {
+	var result = false;
+	var king = [-1, 1, -9, 9, -10, 10, -11, 11];
+	var start = attacker.getAttribute('id');
+	var end = fallen.getAttribute('id');
+	if(king.indexOf(start-end) > -1) {
 		result = true;
 	}
 	return result;
@@ -520,6 +607,7 @@ function hasOppenent(source , dest) {
 
 var pelem = document.getElementById("pel");
 var mov = document.getElementById("onm");
+var tu = document.getElementById("turn");
 setInterval("update()",100);
 
 function update() {
@@ -528,6 +616,7 @@ function update() {
 	else
 		pelem.innerHTML = null;
 	onm.innerHTML = onmove;
+	turn.innerHTML = 'turn = ' + chance ;
 }
 
 function cutPiece(attacker, fallen) {
