@@ -9,6 +9,7 @@ table.cboard {
 img.piece {
 	position: relative;
 	border:1px solid black;
+	margin: auto;
 }
 
 tr.line {
