@@ -1,7 +1,7 @@
 <!DOCTYPE HTML>
 <head>
 <title>Simple Chess</title>
-
+<meta charset="UTF-8">
 <link rel="stylesheet" type="text/css" href="style.css" >
 </head>
 <style>
@@ -37,11 +37,22 @@ var gameIn = false;
 var pElem;
 var onmove = false;
 var fallenPieces = [];
+
+var castling = false;
+var history ;//= {whiterook1:false,whiterook2:false,whiteking1:false,blackrook1:false, blackrook2:false, blackking1:false};
+history.whiterook1 = false;
+history.whiterook2 = false;
+history.whiteking1 = false;
+history.blackrook1 = false;
+history.blackrook2 = false;
+history.blackking1 = false;
+//alert('out alert ' + history.whiterook2);
 function startGame(src) {
 	if(!gameIn) {
 		src.innerHTML = "Click here to Stop!" ;
 		gameIn = true;
 		chance = 'white';
+		//alert(history['whiterook1']);
 		addSquares(src);
 		addChessElements(src);
 	}
@@ -300,10 +311,15 @@ function moveToThis(event, src) {
 	if(src.childNodes.length ==0) {
 		if(validMove(src)) {
 			if(onmove) {
+				var pieceType = pElem.getAttribute("piece");
+				if(pieceType == 'rook' || pieceType == 'king' ) {
+					moved(pElem);	
+				}
 				src.appendChild(pElem);
 				onmove = false;
 				pElem = null;
 				changeChance();
+				
 			} 
 		}
 		else
@@ -313,16 +329,41 @@ function moveToThis(event, src) {
 		//alert("The destination contains another coin");
 		//alert("The first piece is "+ pElem.getAttribute("player"));
 		if(src.childNodes[0].getAttribute("player") == pElem.getAttribute("player")) {
-			alert("That's your piece try some other position");
+			
+			if(pElem.getAttribute('piece') == 'king') {
+				console.log('king is moving');
+				if(validMove(src)) {
+					console.log("castle found to be true");
+					if(!hasIntermediate(Number(pElem.parentNode.getAttribute('id')),Number(src.getAttribute('id')),'castle', null)) {
+						castle(pElem, src.childNodes[0]);
+						pElem = null;
+						onmove = false;
+						changeChance();
+					}
+				}
+			}
+			else
+				alert("That's your piece try some other position");
+
 		}			
 		else
 		{
+			if(pElem.getAttribute('piece') == 'king' && !isKing(pElem.parentNode, src)) {
+				return;
+			}
+
 			if(validMove(src)) {
 				//alert("Trying to cut oppnenet coin");
+				var pieceType = pElem.getAttribute("piece");
+				if(pieceType == 'rook' || pieceType == 'king' ) {
+					moved(pElem);	
+				}
+				
 				cutPiece(pElem, src.childNodes[0]);
 				pElem = null;
 				onmove = false;
 				changeChance();
+				
 			}
 			
 		}
@@ -337,6 +378,20 @@ function changeChance() {
  	else {
  		chance = "white";
  	}
+}
+
+
+function castle(attacker, fallen) {
+	var end = fallen.parentNode.getAttribute('id');
+	var start = attacker.parentNode.getAttribute('id');
+	if(end == 81 || end == 88) {
+		document.getElementById(end-10).appendChild(attacker);
+		document.getElementById(end-20).appendChild(fallen);
+	}
+	else if( end == 11 || end == 18)  {
+		document.getElementById(start-30).appendChild(attacker);
+		document.getElementById(start-20).appendChild(fallen);
+	}
 }
 
 function validMove(src) {
@@ -417,11 +472,37 @@ function validMove(src) {
 			break;
 		case "king" :
 			result = isKing(pElem.parentNode, src);
+			console.log("isking = "+result);
+			var tar = src.getAttribute("id");
+			var cast = ['11', '18', '81', '88'];
+			if(!result && (cast.indexOf(tar) > -1)) {
+				console.log('entered first test');
+				if(src.childNodes[0]) {
+					console.log('entered second test');
+					if(isNotMoved(pElem, src.childNodes[0])) {
+						console.log('entered third test');
+						result = true;
+						console.log('castling found success');
+					}						
+				}
+			}
 			break;
-
-
 	}
  	return result;
+}
+
+
+function isNotMoved(attacker, fallen) {
+	var att = attacker.getAttribute('player') + attacker.getAttribute('id');
+	var fal = fallen.getAttribute('player') + fallen.getAttribute('id');
+	console.log('attacker id = ' + att + ' moved ' + history["whiteking1"]+' '+ ' and fallen id = '+ fal+ ' '+history['whiterook1']);
+	if(history[att] == false && history[fal] == false) {
+		return true;
+	}
+	else {
+		return false;
+	}
+
 }
 
 function hasIntermediate(attacker, fallen, sign, direction) {
@@ -468,6 +549,16 @@ function hasIntermediate(attacker, fallen, sign, direction) {
 					result = true;
 					//console.log("hitting another coin at " + start);
 				 	break;
+				}
+			}
+			break;
+		case 'castle' :
+			increment = 10;
+			for(start+=increment;start<end;start+=increment) {
+				console.log('start ' + start+ ' end = '+ end);
+				if(document.getElementById(start).childNodes[0]) {
+					result = true;
+					break;
 				}
 			}
 			break;
@@ -595,6 +686,12 @@ function checkSpeicial(type, player, sPos, dPos, src) {
 	}
 	return result;
 }
+
+function moved(source) {
+	var attacker = source.getAttribute("player")+source.getAttribute("id");
+	console.log((history[attacker] = true) +""+ attacker);
+}
+
 
 
 function hasOppenent(source , dest) {
