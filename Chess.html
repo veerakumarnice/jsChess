@@ -1,0 +1,484 @@
+<!DOCTYPE HTML>
+<head>
+<title>Simple Chess</title>
+
+<link rel="stylesheet" type="text/css" href="style.css" >
+</head>
+<style>
+
+
+</style>
+<body>
+<table>
+<tbody>
+	<tr>
+		<td id="pel"></td><td id="onm"></td> 
+	</tr>
+</tbody>
+</table>
+<h1 id="h">Simple Chess</h1>
+
+
+<div class="board"> 
+<table id="chessTable" class="cboard">
+	
+</table>
+
+</div>
+<br><br>
+<div class="start" >
+<button onclick="startGame(this)" >Click here to Start! </button>
+
+</div>
+
+
+<script>
+var gameIn = false;
+var pElem;
+var onmove = false;
+var fallenPieces = [];
+function startGame(src) {
+	if(!gameIn) {
+		src.innerHTML = "Click here to Stop!" ;
+		gameIn = true;
+		addSquares(src);
+		addChessElements(src);
+	}
+	else {
+		src.innerHTML = "Click here to Start!";
+		gameIn = false;
+		onmove = false;
+		pElem  = null;
+		removeSquares();
+		removeChessElements();		
+	}
+}
+
+function addSquares(src) {
+	var table = document.getElementById('chessTable');
+	var tabBody = document.createElement("tbody");
+	tabBody.setAttribute("id","chessBody");
+	for(var i=1;i<=8;i++) {
+		var tabrow = document.createElement("tr");
+		tabrow.setAttribute("class","line");
+		for(var j=1;j<=8;j++) {
+			var td = document.createElement("td");
+			td.setAttribute("xpos",j);
+			td.setAttribute("ypos",i);
+			td.setAttribute("id",""+j+i);
+			td.setAttribute("onclick","moveToThis(event,this)");
+			var scolor;
+			if(((i+j)%2)==0) {
+					scolor="white";
+			}
+			else {			
+					scolor="black";
+			}
+			td.setAttribute("class",scolor);
+			tabrow.appendChild(td);
+		}
+		tabBody.appendChild(tabrow);
+	}
+	table.style.border = "2px solid black";
+	table.appendChild(tabBody);	
+}
+
+function addChessElements(src) {
+	addPawns(src);
+	addRooks();
+	addBhisops();
+	addKnights();
+	addQueen();
+	addKing();
+}
+
+function addPawns(src) {
+	
+	for(var col =1;col<=8;col++) {	
+		var pawn = document.getElementById(""+col+2);
+		var img = document.createElement("img");
+		img.setAttribute("src","pawnBlack.png");
+		img.setAttribute("class","piece pawn black");
+		img.setAttribute("onmouseover","this.style.cursor='grab';");
+		img.setAttribute("onclick","moveElement(event,this)");
+		img.setAttribute("id","pawn"+col);
+		img.setAttribute("player","black");
+		img.setAttribute("piece","pawn");
+		pawn.appendChild(img);
+	}
+
+	for(var col =1;col<=8;col++) {	
+		var pawn = document.getElementById(""+col+7);
+		var img = document.createElement("img");
+		img.setAttribute("src","pawnWhite.png");
+		img.setAttribute("class","piece pawn white");
+		img.setAttribute("onmouseover","this.style.cursor='grab';");
+		img.setAttribute("onclick","moveElement(event,this)");
+		img.setAttribute("id","pawn"+col);
+		img.setAttribute("player","white");
+		img.setAttribute("piece","pawn");
+		pawn.appendChild(img);
+	}
+
+
+}
+
+
+function addRooks() {
+	var array = [11,18,81,88];
+	var target;
+	for(var i in array) {
+		target = document.getElementById(array[i]);
+		var img = document.createElement("img");
+		if(i%2==0) {
+			img.setAttribute("src","rookBlack.png");
+			img.setAttribute("class","piece rook black");
+			img.setAttribute("player","black");
+		}
+		else {
+			img.setAttribute("src","rookWhite.png");
+			img.setAttribute("class","piece rook white");
+			img.setAttribute("player","white");
+		}
+		img.setAttribute("onmouseover","this.style.cursor='grab';");
+		img.setAttribute("onclick","moveElement(event,this)");
+		img.setAttribute("piece","rook");
+		img.setAttribute("id","rook"+(Math.floor(i/2)+1));
+		target.appendChild(img);
+	}
+}
+
+function addBhisops() {
+	var array = [31,38,61,68];
+	var target;
+	for(var i in array) {
+		target = document.getElementById(array[i]);
+		var img = document.createElement("img");
+		if(i%2==0) {
+			img.setAttribute("src","bishopBlack.png");
+			img.setAttribute("class","piece bishop black");
+			img.setAttribute("player","black");
+		}
+		else {
+			img.setAttribute("src","bishopWhite.png");
+			img.setAttribute("class","piece bishop white");
+			img.setAttribute("player","white");
+		}
+		img.setAttribute("onmouseover","this.style.cursor='grab';");
+		img.setAttribute("onclick","moveElement(event,this)");
+		img.setAttribute("piece","bishop");
+		img.setAttribute("id","bishop"+(Math.floor(i/2)+1));
+		target.appendChild(img);
+	}
+
+}
+
+function addKnights() {
+
+
+}
+
+function addQueen() {
+
+}
+
+function addKing() {
+
+}
+function removeSquares() {
+	var tbody = document.getElementById('chessBody');
+	tbody.parentNode.removeChild(tbody);
+}
+
+function removeChessElements() {
+	
+}
+
+
+function pickThis(event, src) {
+	src.style.cursor = "grabbing";
+	//setInterval();
+}
+
+function moveElement(event, src) {
+	if(onmove && src==pElem) {
+		//alert("source = destination");		
+		onmove = false;
+		pElem = null;
+		src.style.cursor = "grab";
+		stopEvent(event);
+		return;
+	}
+	if(!onmove) {
+		stopEvent(event);
+		pElem = src;
+		src.style.cursor = "grabbing";
+		onmove = true;
+	}
+
+}
+
+function stopEvent(event) {
+	event = event || window.event;
+	if(event.stopPropagation) 
+		event.stopPropagation();
+	else
+		event.cancelBubble = true; 	
+}
+
+function moveToThis(event, src) {
+	if(src.childNodes.length ==0) {
+		if(validMove(src)) {
+			if(onmove) {
+				src.appendChild(pElem);
+				onmove = false;
+				pElem = null;
+			} 
+		}
+		else
+			alert("Not a valid move");
+	}
+	else {
+		//alert("The destination contains another coin");
+		//alert("The first piece is "+ pElem.getAttribute("player"));
+		if(src.childNodes[0].getAttribute("player") == pElem.getAttribute("player")) {
+			alert("You are hitting your own coin");
+		}			
+		else
+		{
+			if(validMove(src)) {
+				alert("Trying to cut oppnenet coin");
+				cutPiece(pElem, src.childNodes[0]);
+				pElem = null;
+				onmove = false;
+			}
+			
+		}
+	}
+
+}
+function validMove(src) {
+
+	var pType = pElem.getAttribute("piece");
+	var plyr = pElem.getAttribute("player");
+	var sParent = pElem.parentNode;
+	var sPos  = Number(pElem.parentNode.getAttribute("id"));
+	var dPos  = Number(src.getAttribute("id"));
+	//alert("src = "+sPos+" des = "+dPos);
+	var result = false;
+	switch(pType) {
+		case "pawn" :
+			if(plyr=="black") {
+				if(dPos > sPos) {
+					if(sPos%10==2) {
+						
+						if(dPos == sPos +1 || dPos == sPos+2){
+							result = true;
+						}
+					}
+					else
+					{
+						if(dPos == sPos+1) {
+							result = true;
+						}
+					}
+					
+				}
+			}
+			else
+			{
+				if(sPos > dPos) {
+					if(sPos%10==7) {
+						if(sPos == dPos+1 || sPos == dPos+2) {
+							result = true;
+						}
+					}
+					else
+					{
+						if(sPos == dPos+1) {
+							result = true;
+						}
+					}
+				}
+			}
+			if(checkSpeicial(pType, plyr, sPos, dPos, src)){
+				result = true;
+			}
+			break;
+		case "rook" :
+			var retObj;
+			if((retObj = isPlus(pElem.parentNode,src)).bool) {
+					
+					if(!hasIntermediate(sPos,dPos, 'plus', retObj.direction)) {
+						result = true;
+					}
+				
+			}
+
+			break;
+		case "knight" :
+
+
+			break;
+		case "bishop" :
+
+			break;
+		case "queen" :
+
+			break;
+		case "king" :
+
+			break;
+
+
+	}
+ 	return result;
+}
+
+function hasIntermediate(attacker, fallen, sign,direction) {
+	var result = false;
+
+	switch(sign) {
+		case 'plus' :
+			var start;
+			var end;
+			if((attacker - fallen ) <0) {
+					start = attacker;
+					end = fallen;
+			}				
+			else {
+					start = fallen;
+					end = attacker;
+			}
+			var increment;
+			if(direction == 'xpos') {
+				increment = 1;
+			}
+			else if(direction == 'ypos') {
+				increment = 10;
+			}
+			for(start=start+increment;start<end;start+=increment) {
+				if(document.getElementById(start).childNodes[0]) {
+						result = true;
+						alert("There is a coin inbteween " + start);
+						break;
+					}
+				}
+			break; 
+		case 'cross' :
+
+			break;
+
+	}
+	return result;
+}
+
+function isPlus(attacker, fallen) {
+	var result = {bool:false, direction:"none"};
+	if(attacker.getAttribute("xpos") == fallen.getAttribute("xpos")) {
+			result.bool = true;
+			result.direction = "xpos";
+	}
+	else if(attacker.getAttribute("ypos") == fallen.getAttribute("ypos")) {
+			result.bool = true;
+			result.direction = "ypos";
+	}
+
+	return result;
+}
+
+
+function isCross(attacker, fallen) {
+	var result = {bool:false,direction:'none'};
+	var start;
+	var end;
+	if((attacker-fallen)<0) {
+		start = attacker;
+		end = fallen;
+	}
+	else
+	{
+		start = fallen;
+		end = attacker;
+	}
+	var temp = start;
+	for(;start <= end; start+=11) {
+		if(start%10 == 8) {
+			break;
+		}
+		if(start == end) {
+			result.bool = true;
+			result.direction = 'right';
+			break;
+		}
+	}
+	start = temp;
+	if(!result) {
+		for( ;end >= start;end-=9) {
+			if(end%10 == 8) {
+				break;
+			}
+			if(end == start) {
+				result.bool = true;
+				result.direction = 'left';
+				break;
+			}
+		}
+	}
+
+	return result;
+}
+
+function checkSpeicial(type, player, sPos, dPos, src) {
+	var result = false;
+	if(type == 'pawn') {
+		if(player == "black") {
+			if(dPos == sPos - 9 || dPos == sPos + 11) {
+				if(src.childNodes[0].getAttribute("player") != player)
+					result = true;
+			}
+		}
+		else
+		{
+			if(dPos == sPos + 9  || dPos == sPos -11) {
+				if(src.childNodes[0].getAttribute("player") != player)
+					result = true;
+			}
+		}
+	}
+	return result;
+}
+
+
+function hasOppenent(source , dest) {
+	var result = false;
+	if(source.getAttribute("player") != dest.childNodes[0].getAttribute("player")) {
+		result = true;
+	}
+	return result;
+}
+
+var pelem = document.getElementById("pel");
+var mov = document.getElementById("onm");
+setInterval("update()",100);
+
+function update() {
+	if(pElem)
+		pelem.innerHTML = pElem.getAttribute("player")+" "+pElem.getAttribute("id");
+	else
+		pelem.innerHTML = null;
+	onm.innerHTML = onmove;
+}
+
+function cutPiece(attacker, fallen) {
+	fallenPieces.push({piece:fallen, id:fallen.parentNode.getAttribute("id")});
+	var target = fallen.parentNode;
+	target.removeChild(fallen);
+	target.appendChild(attacker);
+}
+
+</script>
+
+	
+</div>
+</body>
