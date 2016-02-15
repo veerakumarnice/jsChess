@@ -17,17 +17,23 @@
 </tbody>
 </table>
 <h1 id="h">Simple Chess</h1>
-
-
-<div class="board"> 
-<table id="chessTable" class="cboard">
+<div class="container">
+	<div class ="left" id="leftboard">
+		
+	</div>
+	<div class="board"> 
+		<table id="chessTable" class="cboard">
 	
-</table>
+		</table>
 
+	</div>
+	<!--div class = "right">
+	<p >right </p>
+	</div-->
 </div>
 <br><br>
 <div class="start" >
-<button onclick="startGame(this)" >Click here to Start! </button>
+	<button id="btn" class="button" onclick="startGame(this)" >Click here to Start! </button>
 </div>
 
 
@@ -37,7 +43,7 @@ var gameIn = false;
 var pElem;
 var onmove = false;
 var fallenPieces = [];
-
+var restart = false;
 var castling = false;
 var history ;//= {whiterook1:false,whiterook2:false,whiteking1:false,blackrook1:false, blackrook2:false, blackking1:false};
 history.whiterook1 = false;
@@ -62,7 +68,15 @@ function startGame(src) {
 		onmove = false;
 		pElem  = null;
 		removeSquares();
-		removeChessElements();		
+		removeChessElements();
+		removeLeftPieces();		
+	}
+}
+
+function removeLeftPieces() {
+	var target = document.getElementById("leftboard");
+	while(target.firstChild) {
+		target.removeChild(target.firstChild);
 	}
 }
 
@@ -273,6 +287,16 @@ function pickThis(event, src) {
 }
 
 function moveElement(event, src) {
+	if(!gameIn && restart == true) {
+		var con = confirm("Do you want to restart");
+		if(con) {
+			gameIn = true;
+			restart = false;
+			startGame(document.getElementById('btn'));
+		
+		}
+		return;
+	}
 
 	if(src.getAttribute("player") != chance && !onmove) {
 		alert("Its your oppnenet's move");
@@ -283,7 +307,9 @@ function moveElement(event, src) {
 	if(onmove && src==pElem) {
 		//alert("source = destination");		
 		onmove = false;
+		clearSelection(pElem);
 		pElem = null;
+		
 		src.style.cursor = "grab";
 		stopEvent(event);
 		return;
@@ -316,10 +342,15 @@ function moveToThis(event, src) {
 					moved(pElem);	
 				}
 				src.appendChild(pElem);
+				var to= Number(src.getAttribute('id'));
+				if(pieceType == 'pawn' && ( to%10 == 1  || to%10 == 8  ) ){
+					promotion(pElem);
+				}
 				onmove = false;
+				clearSelection(pElem);
 				pElem = null;
-				changeChance();
 				
+				changeChance();				
 			} 
 		}
 		else
@@ -336,7 +367,9 @@ function moveToThis(event, src) {
 					console.log("castle found to be true");
 					if(!hasIntermediate(Number(pElem.parentNode.getAttribute('id')),Number(src.getAttribute('id')),'castle', null)) {
 						castle(pElem, src.childNodes[0]);
+						clearSelection(pElem);
 						pElem = null;
+						
 						onmove = false;
 						changeChance();
 					}
@@ -360,16 +393,40 @@ function moveToThis(event, src) {
 				}
 				
 				cutPiece(pElem, src.childNodes[0]);
+				clearSelection(pElem);
 				pElem = null;
-				onmove = false;
-				changeChance();
 				
+				onmove = false;
+				changeChance();				
 			}
 			
 		}
 	}
 
 }
+
+function titleCase(string) {
+	return string.charAt(0).toUpperCase() +string.slice(1);
+}
+
+function promotion(src) {
+	var choiceMade = false;
+	var choice ;
+	var player = src.getAttribute('player');
+	var array = ['queen', 'rook', 'bishop', 'knight'];
+	while(!choiceMade) {
+		choice = prompt("Enter the choice for promotion:\nQueen\nKnight\nBishop\nRook");
+		choice = choice.toLowerCase();
+		if(array.indexOf(choice) > -1) {
+			choiceMade = true;
+		}
+	}
+	src.setAttribute("src",player+titleCase(choice)+".png");
+	src.setAttribute("class", "piece "+choice+" "+player);
+	src.setAttribute("piece",choice);
+}
+
+
 
 function changeChance() {
 	if(chance == 'white') {
@@ -708,19 +765,48 @@ var tu = document.getElementById("turn");
 setInterval("update()",100);
 
 function update() {
-	if(pElem)
+	/*if(pElem)
 		pelem.innerHTML = pElem.getAttribute("player")+" "+pElem.getAttribute("id");
 	else
-		pelem.innerHTML = null;
-	onm.innerHTML = onmove;
-	turn.innerHTML = 'turn = ' + chance ;
+		pelem.innerHTML = null;*/
+	//onm.innerHTML = onmove;
+	turn.innerHTML = 'Turn : ' + chance ;
+	if(pElem) {
+		setSelection(pElem);
+	}
+}
+
+function clearSelection(target) {
+	target.style.boxShadow = "0px 0px 0px";
+}
+
+function setSelection(target) {
+	target.style.boxShadow = "5px 5px 5px blue" ;
 }
 
 function cutPiece(attacker, fallen) {
 	fallenPieces.push({piece:fallen, id:fallen.parentNode.getAttribute("id")});
+	console.log('cutPiece called');
 	var target = fallen.parentNode;
-	target.removeChild(fallen);
+	if(fallen.getAttribute('piece') == 'king') {
+		if(attacker.getAttribute('player') == 'white') {
+			alert('white wins');
+		}
+		else
+		{
+			alert('black wins') ;
+		}
+		gameIn = false;
+		restart = true;
+	}
+	document.getElementById('leftboard').appendChild(target.childNodes[0]);
 	target.appendChild(attacker);
+	to = target.getAttribute('id');
+	if(target.childNodes[0].getAttribute('piece') == 'pawn' && ( to%10 == 1  || to%10 == 8  ) ){
+		promotion(pElem);
+	}
+
+
 }
 
 </script>
