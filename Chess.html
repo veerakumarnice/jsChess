@@ -346,6 +346,12 @@ function moveToThis(event, src) {
 				if(pieceType == 'pawn' && ( to%10 == 1  || to%10 == 8  ) ){
 					promotion(pElem);
 				}
+				var from = Number(pElem.parentNode.getAttribute('id'));
+				//else if (pieceType == 'pawn' && ((to%10 == 4 || to%10 == 5) && (from % 10 == 2 || from % 10 == 7) ) {
+					//if(isEnpassant(to, pElem.getAttribute('player'))) {
+						//enpassant = {piece:pElem,pos:} ;
+				//	}
+				//}
 				onmove = false;
 				clearSelection(pElem);
 				pElem = null;
@@ -404,6 +410,28 @@ function moveToThis(event, src) {
 	}
 
 }
+
+function isEnpassant(to, player) {
+	var result = false;
+	var opp;
+	if(to+10 > 10 && to+10 <90) {
+		if(opp = document.getElementById(to+10).childNodes[0]) {
+			if(opp.getAttribute('player') != player ) {
+				result = true;
+			}
+		}
+	}
+	if(to-10 >0 && to-10 <80) {
+		if(opp = document.getElementById(to-10).childNodes[0]) {
+			if(opp.getAttribute('player') != player) {
+				result = true;
+			}
+		}
+	}
+
+	return result;
+}
+
 
 function titleCase(string) {
 	return string.charAt(0).toUpperCase() +string.slice(1);
